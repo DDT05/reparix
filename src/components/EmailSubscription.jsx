@@ -158,8 +158,8 @@ export const EmailSubscription = ({ compact = false }) => {
         
         <Button
           type="submit"
-          disabled={status === 'loading' || !connectionTested}
-         disabled={status === 'loading' || !isConnected}
+          disabled={status === 'loading' || !isConnected}
+          className={`w-full py-3 px-6 font-semibold rounded-lg transition-all duration-300 ${
             status === 'success' 
               ? 'bg-green-600 hover:bg-green-700 text-white' 
               : 'bg-green-600 hover:bg-green-700 text-white hover:scale-105 hover:shadow-lg'
