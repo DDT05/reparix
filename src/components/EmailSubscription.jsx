@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { Button } from './ui/button'
 import { Mail, Check, AlertCircle } from 'lucide-react'
 
@@ -17,32 +17,30 @@ export const EmailSubscription = ({ compact = false }) => {
       return
     }
 
-    // Check if Supabase is properly configured
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY || 
-        import.meta.env.VITE_SUPABASE_URL === 'your-supabase-url' || 
-        import.meta.env.VITE_SUPABASE_ANON_KEY === 'your-supabase-anon-key') {
+    // Check if Supabase is properly configured with real values
+    if (!isSupabaseConfigured()) {
       setStatus('error')
-      setMessage('Configuration Supabase manquante. Veuillez configurer les variables d\'environnement.')
-      console.error('Supabase environment variables are not configured properly:', {
-        url: import.meta.env.VITE_SUPABASE_URL,
-        key: import.meta.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
-      })
+      setMessage('Service temporairement indisponible. Configuration Supabase requise.')
+      console.error('Supabase not configured properly. Using placeholder values.')
       return
     }
 
     setStatus('loading')
     
     try {
+      console.log('Attempting to insert email:', email.toLowerCase().trim())
+      
       const { data, error } = await supabase
-        .from('Reparix')
+        .from('reparix')
         .insert([
           { 
-            email: email.toLowerCase().trim()
+            email: email.toLowerCase().trim(),
+            subscribed: true
           }
         ])
 
       if (error) {
-        console.error('Supabase error:', error)
+        console.error('Supabase insertion error:', error)
         // Check if it's a duplicate email error
         if (error.code === '23505') {
           setStatus('error')
@@ -51,6 +49,7 @@ export const EmailSubscription = ({ compact = false }) => {
           throw error
         }
       } else {
+        console.log('Successfully inserted email:', data)
         setStatus('success')
         setMessage('Merci ! Vous êtes maintenant inscrit à notre newsletter')
         setEmail('')
