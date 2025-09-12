@@ -1,63 +1,108 @@
-import React, { useState } from 'react'
-import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import React, { useState, useEffect } from 'react'
+import { supabase, isSupabaseConfigured, testSupabaseConnection } from '../lib/supabase'
 import { Button } from './ui/button'
-import { Mail, Check, AlertCircle } from 'lucide-react'
+import { Mail, Check, AlertCircle, Loader2 } from 'lucide-react'
 
 export const EmailSubscription = ({ compact = false }) => {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle') // idle, loading, success, error
   const [message, setMessage] = useState('')
+  const [connectionTested, setConnectionTested] = useState(false)
+
+  // Test Supabase connection on component mount
+  useEffect(() => {
+    const testConnection = async () => {
+      if (isSupabaseConfigured()) {
+        console.log('Testing Supabase connection...')
+        const isConnected = await testSupabaseConnection()
+        setConnectionTested(true)
+        console.log('Connection test result:', isConnected)
+      } else {
+        console.log('Supabase not configured, skipping connection test')
+        setConnectionTested(true)
+      }
+    }
+    
+    testConnection()
+  }, [])
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (!email || !email.includes('@')) {
+    console.log('Form submitted with email:', email)
+    
+    // Reset previous messages
+    setMessage('')
+    
+    // Validate email
+    if (!email || !validateEmail(email)) {
       setStatus('error')
       setMessage('Veuillez entrer une adresse email valide')
       return
     }
 
-    // Check if Supabase is properly configured with real values
+    // Check if Supabase is properly configured
     if (!isSupabaseConfigured()) {
       setStatus('error')
-      setMessage('Service temporairement indisponible. Configuration Supabase requise.')
-      console.error('Supabase not configured properly. Using placeholder values.')
+      setMessage('Service temporairement indisponible. Configuration en cours...')
+      console.error('Supabase not configured properly')
       return
     }
 
     setStatus('loading')
     
     try {
-      console.log('Attempting to insert email:', email.toLowerCase().trim())
+      const emailToInsert = email.toLowerCase().trim()
+      console.log('Attempting to insert email:', emailToInsert)
       
+      // Insert into the reparix table
       const { data, error } = await supabase
         .from('reparix')
         .insert([
           { 
-            email: email.toLowerCase().trim(),
+            email: emailToInsert,
             subscribed: true
           }
         ])
+        .select()
+
+      console.log('Supabase response:', { data, error })
 
       if (error) {
         console.error('Supabase insertion error:', error)
-        // Check if it's a duplicate email error
-        if (error.code === '23505') {
+        
+        // Handle specific error cases
+        if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique')) {
           setStatus('error')
-          setMessage('Cette adresse email est déjà inscrite')
+          setMessage('Cette adresse email est déjà inscrite à notre newsletter')
+        } else if (error.code === '42501') {
+          setStatus('error')
+          setMessage('Erreur de permissions. Veuillez réessayer.')
         } else {
-          throw error
+          setStatus('error')
+          setMessage(`Erreur: ${error.message || 'Service temporairement indisponible'}`)
         }
       } else {
         console.log('Successfully inserted email:', data)
         setStatus('success')
-        setMessage('Merci ! Vous êtes maintenant inscrit à notre newsletter')
+        setMessage('Parfait ! Vous êtes maintenant inscrit à notre newsletter Reparix')
         setEmail('')
+        
+        // Reset success message after 5 seconds
+        setTimeout(() => {
+          setStatus('idle')
+          setMessage('')
+        }, 5000)
       }
     } catch (error) {
-      console.error('Subscription error:', error)
+      console.error('Unexpected error during subscription:', error)
       setStatus('error')
-      setMessage('Service temporairement indisponible. Veuillez réessayer plus tard.')
+      setMessage('Une erreur inattendue s\'est produite. Veuillez réessayer.')
     }
   }
 
@@ -74,7 +119,7 @@ export const EmailSubscription = ({ compact = false }) => {
         />
         <Button
           onClick={handleSubmit}
-          disabled={status === 'loading' || status === 'success'}
+          disabled={status === 'loading' || !connectionTested}
           className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
             status === 'success' 
               ? 'bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto' 
@@ -82,13 +127,21 @@ export const EmailSubscription = ({ compact = false }) => {
           }`}
         >
           {status === 'loading' ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : status === 'success' ? (
             <Check className="w-4 h-4" />
           ) : (
             'S\'inscrire'
           )}
         </Button>
+        
+        {message && (
+          <div className={`text-xs mt-1 ${
+            status === 'success' ? 'text-green-600' : 'text-red-600'
+          }`}>
+            {message}
+          </div>
+        )}
       </div>
     )
   }
@@ -121,17 +174,19 @@ export const EmailSubscription = ({ compact = false }) => {
         
         <Button
           type="submit"
-          disabled={status === 'loading' || status === 'success'}
+          disabled={status === 'loading' || !connectionTested}
           className={`w-full py-3 text-base md:text-lg font-semibold rounded-lg transition-all duration-300 ${
             status === 'success' 
               ? 'bg-green-600 hover:bg-green-700 text-white' 
               : 'bg-green-600 hover:bg-green-700 text-white hover:scale-105 hover:shadow-lg'
           }`}
         >
-          {status === 'loading' && (
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-          )}
-          {status === 'success' ? (
+          {status === 'loading' ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Inscription en cours...
+            </>
+          ) : status === 'success' ? (
             <>
               <Check className="w-5 h-5 mr-2" />
               Inscrit !
