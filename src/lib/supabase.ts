@@ -1,80 +1,63 @@
 import { createClient } from '@supabase/supabase-js'
 
+// In Bolt-Supabase integration, these are automatically provided
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-console.log('Supabase Config:', {
-  url: supabaseUrl ? 'SET' : 'MISSING',
-  key: supabaseAnonKey ? 'SET' : 'MISSING',
-  urlValue: supabaseUrl,
-  keyPreview: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'MISSING'
+console.log('Bolt-Supabase Integration Check:', {
+  url: supabaseUrl ? 'Connected' : 'Not Connected',
+  key: supabaseAnonKey ? 'Connected' : 'Not Connected'
 })
-
-// Check if environment variables are properly configured
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables:', {
-    url: supabaseUrl ? 'SET' : 'MISSING',
-    key: supabaseAnonKey ? 'SET' : 'MISSING'
-  })
-}
-
-// Check if using placeholder values
-const isPlaceholder = (value) => {
-  return !value || 
-         value === 'your-supabase-url' || 
-         value === 'your-supabase-anon-key' ||
-         value.includes('placeholder') ||
-         value.includes('your-') ||
-         value === 'https://placeholder.supabase.co' ||
-         value === 'placeholder-key'
-}
-
-export const isSupabaseConfigured = () => {
-  const configured = supabaseUrl && 
-         supabaseAnonKey && 
-         !isPlaceholder(supabaseUrl) && 
-         !isPlaceholder(supabaseAnonKey)
-  
-  console.log('Supabase Configuration Check:', {
-    configured,
-    urlValid: supabaseUrl && !isPlaceholder(supabaseUrl),
-    keyValid: supabaseAnonKey && !isPlaceholder(supabaseAnonKey)
-  })
-  
-  return configured
-}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Test connection
-export const testSupabaseConnection = async (tableName = 'reparix') => {
+// Test connection to reparix table
+export const testSupabaseConnection = async () => {
   try {
-    console.log(`Testing connection to table: ${tableName}`)
+    console.log('Testing Bolt-Supabase connection to reparix table...')
     
-    // Test basic connection
-    const { data, error } = await supabase.from(tableName).select('count', { count: 'exact', head: true })
-    console.log(`Supabase connection test for ${tableName}:`, { success: !error, error, data })
+    // Test connection to reparix table
+    const { data, error } = await supabase
+      .from('reparix')
+      .select('count', { count: 'exact', head: true })
     
-    if (error) {
-      console.error(`Table ${tableName} connection failed:`, error)
-      return false
-    }
-    
-    // Test table structure
-    const { data: structureData, error: structureError } = await supabase
-      .from(tableName)
-      .select('*')
-      .limit(1)
-    
-    console.log(`Table ${tableName} structure test:`, { 
-      success: !structureError, 
-      error: structureError,
-      sampleData: structureData 
+    console.log('Reparix table connection test:', { 
+      success: !error, 
+      error: error?.message,
+      count: data 
     })
     
     return !error
   } catch (err) {
-    console.error(`Supabase connection test failed for ${tableName}:`, err)
+    console.error('Bolt-Supabase connection test failed:', err)
     return false
+  }
+}
+
+// Insert email into reparix table
+export const insertEmail = async (email) => {
+  try {
+    console.log('Inserting email into reparix table:', email)
+    
+    const { data, error } = await supabase
+      .from('reparix')
+      .insert([
+        { 
+          email: email.toLowerCase().trim(),
+          subscribed: true
+        }
+      ])
+      .select()
+
+    console.log('Insert result:', { data, error })
+    
+    if (error) {
+      throw error
+    }
+    
+    return { success: true, data }
+  } catch (error) {
+    console.error('Insert error:', error)
+    return { success: false, error }
   }
 }

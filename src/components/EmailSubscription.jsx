@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { supabase, isSupabaseConfigured, testSupabaseConnection } from '../lib/supabase'
+import { testSupabaseConnection, insertEmail } from '../lib/supabase'
 import { Button } from './ui/button'
 import { Mail, Check, AlertCircle, Loader2 } from 'lucide-react'
 
@@ -7,36 +7,19 @@ export const EmailSubscription = ({ compact = false }) => {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle') // idle, loading, success, error
   const [message, setMessage] = useState('')
-  const [connectionTested, setConnectionTested] = useState(false)
+  const [isConnected, setIsConnected] = useState(false)
 
-  // Test Supabase connection on component mount
+  // Test Bolt-Supabase connection on component mount
   useEffect(() => {
-    const testConnection = async () => {
-      if (isSupabaseConfigured()) {
-        console.log('Testing Supabase connection to reparix table...')
-        
-        // Test both possible table names
-        console.log('=== SUPABASE CONNECTION TEST ===')
-        console.log('Testing lowercase "reparix" table...')
-        const isConnectedLower = await testSupabaseConnection('reparix')
-        
-        console.log('Testing uppercase "Reparix" table...')
-        const isConnectedUpper = await testSupabaseConnection('Reparix')
-        
-        console.log('Connection results:', {
-          lowercase_reparix: isConnectedLower,
-          uppercase_Reparix: isConnectedUpper
-        })
-        
-        setConnectionTested(true)
-        console.log('=== END CONNECTION TEST ===')
-      } else {
-        console.log('Supabase not configured, skipping connection test')
-        setConnectionTested(true)
-      }
+    const checkConnection = async () => {
+      console.log('=== BOLT-SUPABASE CONNECTION TEST ===')
+      const connected = await testSupabaseConnection()
+      setIsConnected(connected)
+      console.log('Connection status:', connected)
+      console.log('=== END CONNECTION TEST ===')
     }
     
-    testConnection()
+    checkConnection()
   }, [])
 
   const validateEmail = (email) => {
@@ -45,7 +28,7 @@ export const EmailSubscription = ({ compact = false }) => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    if (e) e.preventDefault()
     
     console.log('Form submitted with email:', email)
     
@@ -59,54 +42,22 @@ export const EmailSubscription = ({ compact = false }) => {
       return
     }
 
-    // Check if Supabase is properly configured
-    if (!isSupabaseConfigured()) {
+    // Check if Bolt-Supabase is connected
+    if (!isConnected) {
       setStatus('error')
-      setMessage('Service temporairement indisponible. Configuration en cours...')
-      console.error('Supabase not configured properly')
+      setMessage('Service temporairement indisponible. Connexion en cours...')
+      console.error('Bolt-Supabase not connected')
       return
     }
 
     setStatus('loading')
     
     try {
-      const emailToInsert = email.toLowerCase().trim()
-      console.log('Attempting to insert email:', emailToInsert)
-      
-      // Insert into the reparix table
-      console.log('Inserting into reparix table...')
-      let { data, error } = await supabase
-        .from('reparix')
-        .insert([
-          { 
-            email: emailToInsert,
-            subscribed: true
-          }
-        ])
-        .select()
+      const result = await insertEmail(email)
 
-      // If lowercase fails, try uppercase
-      if (error && error.code === '42P01') {
-        console.log('Lowercase table failed, trying uppercase "Reparix"...')
-        const result = await supabase
-          .from('Reparix')
-          .insert([
-            { 
-              email: emailToInsert,
-              subscribed: true
-            }
-          ])
-          .select()
-        
-        data = result.data
-        error = result.error
-        console.log('Uppercase table result:', { data, error })
-      }
-
-      console.log('Supabase response:', { data, error })
-
-      if (error) {
-        console.error('Supabase insertion error:', error)
+      if (!result.success) {
+        const error = result.error
+        console.error('Email insertion failed:', error)
         
         // Handle specific error cases
         if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique')) {
@@ -120,7 +71,7 @@ export const EmailSubscription = ({ compact = false }) => {
           setMessage(`Erreur: ${error.message || 'Service temporairement indisponible'}`)
         }
       } else {
-        console.log('Successfully inserted email:', data)
+        console.log('Successfully inserted email:', result.data)
         setStatus('success')
         setMessage('Parfait ! Vous êtes maintenant inscrit à notre newsletter Reparix')
         setEmail('')
@@ -151,7 +102,7 @@ export const EmailSubscription = ({ compact = false }) => {
         />
         <Button
           onClick={handleSubmit}
-          disabled={status === 'loading' || !connectionTested}
+          disabled={status === 'loading' || !isConnected}
           className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
             status === 'success' 
               ? 'bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto' 
@@ -208,7 +159,7 @@ export const EmailSubscription = ({ compact = false }) => {
         <Button
           type="submit"
           disabled={status === 'loading' || !connectionTested}
-          className={`w-full py-3 text-base md:text-lg font-semibold rounded-lg transition-all duration-300 ${
+         disabled={status === 'loading' || !isConnected}
             status === 'success' 
               ? 'bg-green-600 hover:bg-green-700 text-white' 
               : 'bg-green-600 hover:bg-green-700 text-white hover:scale-105 hover:shadow-lg'
