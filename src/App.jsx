@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Button } from './components/ui/button'
-import { EmailSubscription } from './components/EmailSubscription.jsx'
+import { EmailSubscription } from './components/EmailSubscription'
 import { Star, Check, ArrowRight, ChevronLeft, ChevronRight, Menu, X, Wrench, Shield, Clock, Users, Quote } from 'lucide-react'
 import './App.css'
 
@@ -13,17 +13,17 @@ function App() {
     {
       title: "Diagnostiquez les voyants moteur",
       description: "Évitez le garage et diagnostiquez plus de 7 000 problèmes automobiles en quelques secondes sur votre téléphone.",
-      image: "./hand.gif"
+      image: "/hand.gif"
     },
     {
       title: "Recevez des alertes de maintenance",
       description: "Ne manquez plus jamais une vidange, une rotation des pneus ou un entretien important.",
-      image: "./keys.gif"
+      image: "/keys.gif"
     },
     {
       title: "Économisez des milliers d'euros au garage",
       description: "Sachez ce qui ne va pas avant d'aller chez le mécanicien et évitez de vous faire arnaquer.",
-      image: "./plug.gif"
+      image: "/plug.gif"
     }
   ]
 
@@ -132,12 +132,12 @@ function App() {
             <div className="relative animate-fade-in-right">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 relative z-10">
                 <img 
-                  src="./product_img.gif" 
+                  src="/product_img.gif" 
                   alt="Produit Reparix" 
                   className="w-full h-48 sm:h-56 md:h-64 object-contain rounded-lg shadow-2xl hover:scale-105 transition-transform duration-500" 
                 />
                 <img 
-                  src="./Design_sans_titre__2_-removebg-preview.png" 
+                  src="Design_sans_titre__2_-removebg-preview.png" 
                   alt="Tableau de bord avec port OBD2" 
                   className="w-full h-48 sm:h-56 md:h-64 object-contain rounded-lg shadow-2xl hover:scale-105 transition-transform duration-500" 
                 />
@@ -289,7 +289,7 @@ function App() {
             <div className="text-center">
               <div className="mb-6">
                 <div className="w-24 h-24 md:w-32 md:h-32 mx-auto rounded-full bg-green-100 flex items-center justify-center">
-                  <img src="./plug.gif" alt="Branchez Reparix" className="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover" />
+                  <img src="/plug.gif" alt="Branchez Reparix" className="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover" />
                 </div>
               </div>
               <h3 className="text-lg md:text-xl font-bold mb-4">1. Branchez Reparix</h3>
@@ -302,7 +302,7 @@ function App() {
             <div className="text-center">
               <div className="mb-6">
                 <div className="w-24 h-24 md:w-32 md:h-32 mx-auto rounded-full bg-green-100 flex items-center justify-center">
-                  <img src="./keys.gif" alt="Démarrez votre moteur" className="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover" />
+                  <img src="/keys.gif" alt="Démarrez votre moteur" className="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover" />
                 </div>
               </div>
               <h3 className="text-lg md:text-xl font-bold mb-4">2. Démarrez votre moteur</h3>
@@ -315,7 +315,7 @@ function App() {
             <div className="text-center">
               <div className="mb-6">
                 <div className="w-24 h-24 md:w-32 md:h-32 mx-auto rounded-full bg-green-100 flex items-center justify-center">
-                  <img src="./hand.gif" alt="Appuyez pour scanner" className="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover" />
+                  <img src="/hand.gif" alt="Appuyez pour scanner" className="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover" />
                 </div>
               </div>
               <h3 className="text-lg md:text-xl font-bold mb-4">3. Appuyez pour scanner</h3>
