@@ -14,11 +14,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 // Test connection to reparix table
 export const testSupabaseConnection = async () => {
   try {
-    console.log('Testing Bolt-Supabase connection to reparix table...')
+    console.log('Testing Bolt-Supabase connection to Reparix table...')
     
-    // Test connection to reparix table
+    // Test connection to Reparix table
     const { data, error } = await supabase
-      .from('reparix')
+      .from('Reparix')
       .select('count', { count: 'exact', head: true })
     
     console.log('Reparix table connection test:', { 
@@ -34,13 +34,13 @@ export const testSupabaseConnection = async () => {
   }
 }
 
-// Insert email into reparix table
+// Insert email into Reparix table
 export const insertEmail = async (email) => {
   try {
-    console.log('Inserting email into reparix table:', email)
+    console.log('Inserting email into Reparix table:', email)
     
     const { data, error } = await supabase
-      .from('reparix')
+      .from('Reparix')
       .insert([
         { 
           email: email.toLowerCase().trim(),
