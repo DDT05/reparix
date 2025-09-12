@@ -21,7 +21,12 @@ export const EmailSubscription = ({ compact = false }) => {
     if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY || 
         import.meta.env.VITE_SUPABASE_URL === 'your-supabase-url' || 
         import.meta.env.VITE_SUPABASE_ANON_KEY === 'your-supabase-anon-key') {
+        import.meta.env.VITE_SUPABASE_URL === 'your-supabase-url' || 
+        import.meta.env.VITE_SUPABASE_ANON_KEY === 'your-supabase-anon-key') {
       setStatus('error')
+      setMessage('Configuration Supabase manquante. Veuillez configurer les variables d\'environnement.')
+      console.error('Supabase environment variables are not configured properly:', {
+        url: import.meta.env.VITE_SUPABASE_URL,
       setMessage('Configuration Supabase manquante. Veuillez configurer les variables d\'environnement.')
       console.error('Supabase environment variables are not configured properly:', {
         url: import.meta.env.VITE_SUPABASE_URL,
