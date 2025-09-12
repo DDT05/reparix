@@ -1,12 +1,26 @@
 import React, { useState } from 'react'
-import { supabase } from '../lib/supabase.ts'
+import { 
+  insertEmailToReparix, 
+  getConnectionStatus, 
+  isSupabaseConfigured 
+} from '../lib/supabaseService.js'
 import { Button } from './ui/button'
-import { Mail, Check, AlertCircle } from 'lucide-react'
+import { Mail, Check, AlertCircle, Wifi, WifiOff } from 'lucide-react'
 
 export const EmailSubscription = ({ compact = false }) => {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle') // idle, loading, success, error
   const [message, setMessage] = useState('')
+  const [connectionStatus, setConnectionStatus] = useState(null)
+
+  // Check connection status on component mount
+  React.useEffect(() => {
+    const checkConnection = async () => {
+      const status = await getConnectionStatus()
+      setConnectionStatus(status)
+    }
+    checkConnection()
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -17,29 +31,25 @@ export const EmailSubscription = ({ compact = false }) => {
       return
     }
 
+    // Check if Supabase is configured
+    if (!isSupabaseConfigured()) {
+      setStatus('error')
+      setMessage('Veuillez connecter Supabase pour continuer')
+      return
+    }
     setStatus('loading')
+    setMessage('')
     
     try {
-      const { data, error } = await supabase
-        .from('Reparix')
-        .insert([
-          { 
-            email: email.toLowerCase().trim()
-          }
-        ])
-
-      if (error) {
-        // Check if it's a duplicate email error
-        if (error.code === '23505') {
-          setStatus('error')
-          setMessage('Cette adresse email est déjà inscrite')
-        } else {
-          throw error
-        }
-      } else {
+      const result = await insertEmailToReparix(email)
+      
+      if (result.success) {
         setStatus('success')
         setMessage('Merci ! Vous êtes maintenant inscrit à notre newsletter')
         setEmail('')
+      } else {
+        setStatus('error')
+        setMessage(result.error)
       }
     } catch (error) {
       console.error('Subscription error:', error)
@@ -48,24 +58,44 @@ export const EmailSubscription = ({ compact = false }) => {
     }
   }
 
+  // Show connection status for debugging
+  const ConnectionIndicator = () => {
+    if (!connectionStatus) return null
+    
+    return (
+      <div className={`flex items-center text-xs mb-2 ${
+        connectionStatus.connected ? 'text-green-600' : 'text-red-600'
+      }`}>
+        {connectionStatus.connected ? (
+          <Wifi className="w-3 h-3 mr-1" />
+        ) : (
+          <WifiOff className="w-3 h-3 mr-1" />
+        )}
+        <span>{connectionStatus.message}</span>
+      </div>
+    )
+  }
+
   if (compact) {
     return (
-      <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+      <div className="space-y-2">
+        <ConnectionIndicator />
+        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Votre email"
           className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm text-black"
-          disabled={status === 'loading'}
+          disabled={status === 'loading' || !connectionStatus?.connected}
         />
         <Button
           onClick={handleSubmit}
-          disabled={status === 'loading' || status === 'success'}
+          disabled={status === 'loading' || status === 'success' || !connectionStatus?.connected}
           className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
             status === 'success' 
               ? 'bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto' 
-              : 'bg-green-600 hover:bg-green-700 text-white'
+              : 'bg-green-600 hover:bg-green-700 text-white disabled:opacity-50'
           }`}
         >
           {status === 'loading' ? (
@@ -77,10 +107,17 @@ export const EmailSubscription = ({ compact = false }) => {
           )}
         </Button>
       </div>
+        {message && (
+          <div className={`text-xs ${status === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+            {message}
+          </div>
+        )}
+      </div>
     )
   }
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 max-w-md mx-auto">
+      <ConnectionIndicator />
       <div className="text-center mb-6">
         <div className="w-12 h-12 md:w-16 md:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Mail className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
@@ -101,17 +138,17 @@ export const EmailSubscription = ({ compact = false }) => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Votre adresse email"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-black"
-            disabled={status === 'loading'}
+            disabled={status === 'loading' || !connectionStatus?.connected}
           />
         </div>
         
         <Button
           type="submit"
-          disabled={status === 'loading' || status === 'success'}
+          disabled={status === 'loading' || status === 'success' || !connectionStatus?.connected}
           className={`w-full py-3 text-base md:text-lg font-semibold rounded-lg transition-all duration-300 ${
             status === 'success' 
               ? 'bg-green-600 hover:bg-green-700 text-white' 
-              : 'bg-green-600 hover:bg-green-700 text-white hover:scale-105 hover:shadow-lg'
+              : 'bg-green-600 hover:bg-green-700 text-white hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:hover:scale-100'
           }`}
         >
           {status === 'loading' && (
