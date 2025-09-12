@@ -1,44 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase client with environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-let supabase = null
-
-// Initialize Supabase client
-export const initializeSupabase = () => {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('Supabase credentials not found. Please connect to Supabase.')
-    return null
-  }
-  
-  if (!supabase) {
-    supabase = createClient(supabaseUrl, supabaseAnonKey)
-    console.log('✅ Supabase client initialized successfully')
-  }
-  
-  return supabase
-}
-
-// Get Supabase client instance
-export const getSupabaseClient = () => {
-  if (!supabase) {
-    return initializeSupabase()
-  }
-  return supabase
-}
+// Initialize Supabase client directly (Bolt integration)
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+)
 
 // Test Supabase connection
 export const testSupabaseConnection = async () => {
   try {
-    const client = getSupabaseClient()
-    if (!client) {
-      return { success: false, error: 'Supabase not initialized' }
-    }
-
     // Test connection by trying to select from Reparix table
-    const { data, error } = await client
+    const { data, error } = await supabase
       .from('Reparix')
       .select('count', { count: 'exact', head: true })
 
@@ -58,14 +30,9 @@ export const testSupabaseConnection = async () => {
 // Insert email into Reparix table
 export const insertEmailToReparix = async (email) => {
   try {
-    const client = getSupabaseClient()
-    if (!client) {
-      throw new Error('Supabase client not initialized')
-    }
-
     console.log('📧 Inserting email to Reparix table:', email)
 
-    const { data, error } = await client
+    const { data, error } = await supabase
       .from('Reparix')
       .insert([
         { 
@@ -102,21 +69,8 @@ export const insertEmailToReparix = async (email) => {
   }
 }
 
-// Check if Supabase is properly configured
-export const isSupabaseConfigured = () => {
-  return !!(supabaseUrl && supabaseAnonKey && supabaseUrl !== '' && supabaseAnonKey !== '')
-}
-
 // Get connection status
 export const getConnectionStatus = async () => {
-  if (!isSupabaseConfigured()) {
-    return {
-      configured: false,
-      connected: false,
-      message: 'Supabase credentials not configured'
-    }
-  }
-
   const testResult = await testSupabaseConnection()
   return {
     configured: true,

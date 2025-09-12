@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { 
   insertEmailToReparix, 
-  getConnectionStatus, 
-  isSupabaseConfigured 
+  getConnectionStatus
 } from '../lib/supabaseService.js'
 import { Button } from './ui/button'
 import { Mail, Check, AlertCircle, Wifi, WifiOff } from 'lucide-react'
@@ -31,12 +30,6 @@ export const EmailSubscription = ({ compact = false }) => {
       return
     }
 
-    // Check if Supabase is configured
-    if (!isSupabaseConfigured()) {
-      setStatus('error')
-      setMessage('Veuillez connecter Supabase pour continuer')
-      return
-    }
     setStatus('loading')
     setMessage('')
     
@@ -87,11 +80,11 @@ export const EmailSubscription = ({ compact = false }) => {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Votre email"
           className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm text-black"
-          disabled={status === 'loading' || !connectionStatus?.connected}
+          disabled={status === 'loading'}
         />
         <Button
           onClick={handleSubmit}
-          disabled={status === 'loading' || status === 'success' || !connectionStatus?.connected}
+          disabled={status === 'loading' || status === 'success'}
           className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
             status === 'success' 
               ? 'bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto' 
@@ -138,13 +131,13 @@ export const EmailSubscription = ({ compact = false }) => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Votre adresse email"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-black"
-            disabled={status === 'loading' || !connectionStatus?.connected}
+            disabled={status === 'loading'}
           />
         </div>
         
         <Button
           type="submit"
-          disabled={status === 'loading' || status === 'success' || !connectionStatus?.connected}
+          disabled={status === 'loading' || status === 'success'}
           className={`w-full py-3 text-base md:text-lg font-semibold rounded-lg transition-all duration-300 ${
             status === 'success' 
               ? 'bg-green-600 hover:bg-green-700 text-white' 
