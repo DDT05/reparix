@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { testSupabaseConnection, insertEmail, isSupabaseConnected } from '../lib/supabase'
-import { SupabaseConnectionWidget } from './SupabaseConnectionWidget'
+import { testSupabaseConnection, insertEmail } from '../lib/supabase'
 import { Button } from './ui/button'
 import { Mail, Check, AlertCircle, Loader2 } from 'lucide-react'
 
@@ -10,19 +9,17 @@ export const EmailSubscription = ({ compact = false }) => {
   const [message, setMessage] = useState('')
   const [isConnected, setIsConnected] = useState(false)
 
-  // Check Supabase connection on component mount
+  // Test Bolt-Supabase connection on component mount
   useEffect(() => {
     const checkConnection = async () => {
-      const connected = isSupabaseConnected() && await testSupabaseConnection()
+      console.log('=== BOLT-SUPABASE CONNECTION TEST ===')
+      const connected = await testSupabaseConnection()
       setIsConnected(connected)
-      console.log('Supabase connection status:', connected)
+      console.log('Connection status:', connected)
+      console.log('=== END CONNECTION TEST ===')
     }
     
     checkConnection()
-    
-    // Check connection every 5 seconds
-    const interval = setInterval(checkConnection, 5000)
-    return () => clearInterval(interval)
   }, [])
 
   const validateEmail = (email) => {
@@ -45,10 +42,11 @@ export const EmailSubscription = ({ compact = false }) => {
       return
     }
 
-    // Check if Supabase is connected
+    // Check if Bolt-Supabase is connected
     if (!isConnected) {
       setStatus('error')
-      setMessage('Veuillez d\'abord connecter Supabase')
+      setMessage('Service temporairement indisponible. Connexion en cours...')
+      console.error('Bolt-Supabase not connected')
       return
     }
 
@@ -91,28 +89,6 @@ export const EmailSubscription = ({ compact = false }) => {
     }
   }
 
-  // Show connection widget if not connected and not in compact mode
-  if (!isConnected && !compact) {
-    return (
-      <div>
-        <SupabaseConnectionWidget />
-        <div className="bg-gray-100 rounded-lg shadow-lg p-4 md:p-8 max-w-md mx-auto opacity-50">
-          <div className="text-center mb-6">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Mail className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
-            </div>
-            <h3 className="text-xl md:text-2xl font-bold text-gray-500 mb-2">
-              Inscription Newsletter
-            </h3>
-            <p className="text-sm md:text-base text-gray-400">
-              Connectez Supabase pour activer les inscriptions
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   if (compact) {
     return (
       <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
@@ -122,7 +98,7 @@ export const EmailSubscription = ({ compact = false }) => {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Votre email"
           className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm text-black"
-          disabled={status === 'loading' || !isConnected}
+          disabled={status === 'loading'}
         />
         <Button
           onClick={handleSubmit}
@@ -176,13 +152,12 @@ export const EmailSubscription = ({ compact = false }) => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Votre adresse email"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-black"
-            disabled={status === 'loading' || !isConnected}
+            disabled={status === 'loading'}
           />
         </div>
         
         <Button
-          type="button"
-          onClick={handleSubmit}
+          type="submit"
           disabled={status === 'loading' || !isConnected}
           className={`w-full py-3 px-6 font-semibold rounded-lg transition-all duration-300 ${
             status === 'success' 
