@@ -8,7 +8,4 @@ if (!supabaseUrl || !supabaseAnonKey) {
     url: supabaseUrl ? 'SET' : 'MISSING',
     key: supabaseAnonKey ? 'SET' : 'MISSING'
   })
-    url: supabaseUrl ? 'SET' : 'MISSING',
-    key: supabaseAnonKey ? 'SET' : 'MISSING'
-  })
 }
