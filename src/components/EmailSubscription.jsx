@@ -18,10 +18,15 @@ export const EmailSubscription = ({ compact = false }) => {
     }
 
     // Check if Supabase is properly configured
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY || 
+        import.meta.env.VITE_SUPABASE_URL === 'your-supabase-url' || 
+        import.meta.env.VITE_SUPABASE_ANON_KEY === 'your-supabase-anon-key') {
       setStatus('error')
-      setMessage('Configuration manquante. Veuillez contacter le support.')
-      console.error('Supabase environment variables are not configured')
+      setMessage('Configuration Supabase manquante. Veuillez configurer les variables d\'environnement.')
+      console.error('Supabase environment variables are not configured properly:', {
+        url: import.meta.env.VITE_SUPABASE_URL,
+        key: import.meta.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
+      })
       return
     }
 
@@ -29,7 +34,7 @@ export const EmailSubscription = ({ compact = false }) => {
     
     try {
       const { data, error } = await supabase
-        .from('reparix')
+        .from('Reparix')
         .insert([
           { 
             email: email.toLowerCase().trim()
