@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { supabase } from '../lib/supabase.ts'
+import { supabase } from '../lib/supabase'
 import { Button } from './ui/button'
 import { Mail, Check, AlertCircle } from 'lucide-react'
 
