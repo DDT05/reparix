@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { 
   insertEmailToReparix, 
   getConnectionStatus
-} from '../lib/supabaseService.js'
+} from '../lib/supabaseService'
 import { Button } from './ui/button'
 import { Mail, Check, AlertCircle, Wifi, WifiOff } from 'lucide-react'
 

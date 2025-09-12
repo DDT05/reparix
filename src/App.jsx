@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Button } from './components/ui/button'
-import { EmailSubscription } from './components/EmailSubscription'
+import { EmailSubscription } from './components/EmailSubscription.jsx'
 import { Star, Check, ArrowRight, ChevronLeft, ChevronRight, Menu, X, Wrench, Shield, Clock, Users, Quote } from 'lucide-react'
 import './App.css'
 

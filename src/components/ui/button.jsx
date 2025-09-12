@@ -1,8 +1,9 @@
-import React from 'react'
+import * as React from 'react'
 
-export const Button = ({ children, className = '', onClick, disabled, type = 'button', ...props }) => {
+const Button = React.forwardRef(({ children, className = '', onClick, disabled, type = 'button', ...props }, ref) => {
   return (
     <button
+      ref={ref}
       type={type}
       onClick={onClick}
       disabled={disabled}
@@ -12,4 +13,8 @@ export const Button = ({ children, className = '', onClick, disabled, type = 'bu
       {children}
     </button>
   )
-}
+})
+
+Button.displayName = "Button"
+
+export { Button }
