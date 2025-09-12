@@ -1,25 +1,14 @@
 import React, { useState } from 'react'
 import { 
   insertEmailToReparix, 
-  getConnectionStatus
 } from '../lib/supabaseService.js'
 import { Button } from './ui/button'
-import { Mail, Check, AlertCircle, Wifi, WifiOff } from 'lucide-react'
+import { Mail, Check, AlertCircle } from 'lucide-react'
 
 export const EmailSubscription = ({ compact = false }) => {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle') // idle, loading, success, error
   const [message, setMessage] = useState('')
-  const [connectionStatus, setConnectionStatus] = useState(null)
-
-  // Check connection status on component mount
-  React.useEffect(() => {
-    const checkConnection = async () => {
-      const status = await getConnectionStatus()
-      setConnectionStatus(status)
-    }
-    checkConnection()
-  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -51,28 +40,10 @@ export const EmailSubscription = ({ compact = false }) => {
     }
   }
 
-  // Show connection status for debugging
-  const ConnectionIndicator = () => {
-    if (!connectionStatus) return null
-    
-    return (
-      <div className={`flex items-center text-xs mb-2 ${
-        connectionStatus.connected ? 'text-green-600' : 'text-red-600'
-      }`}>
-        {connectionStatus.connected ? (
-          <Wifi className="w-3 h-3 mr-1" />
-        ) : (
-          <WifiOff className="w-3 h-3 mr-1" />
-        )}
-        <span>{connectionStatus.message}</span>
-      </div>
-    )
-  }
 
   if (compact) {
     return (
       <div className="space-y-2">
-        <ConnectionIndicator />
         <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
         <input
           type="email"
@@ -110,7 +81,6 @@ export const EmailSubscription = ({ compact = false }) => {
   }
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 max-w-md mx-auto">
-      <ConnectionIndicator />
       <div className="text-center mb-6">
         <div className="w-12 h-12 md:w-16 md:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Mail className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
