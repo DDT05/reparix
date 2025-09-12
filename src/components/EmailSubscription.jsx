@@ -125,6 +125,7 @@ export const EmailSubscription = ({ compact = false }) => {
               ? 'bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto' 
               : 'bg-green-600 hover:bg-green-700 text-white'
           }`}
+          type="button"
         >
           {status === 'loading' ? (
             <Loader2 className="w-4 h-4 animate-spin" />
