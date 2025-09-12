@@ -1,22 +1,27 @@
-import { createClient } from '@supabase/supabase-js'
+// Supabase integration for Reparix
+// This will be configured when user connects to Supabase
 
-// In Bolt-Supabase integration, these are automatically provided
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+let supabase = null
 
-console.log('Bolt-Supabase Integration Check:', {
-  url: supabaseUrl ? 'Connected' : 'Not Connected',
-  key: supabaseAnonKey ? 'Connected' : 'Not Connected'
-})
+export const initializeSupabase = (supabaseClient) => {
+  supabase = supabaseClient
+  console.log('Supabase client initialized for Reparix')
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const isSupabaseConnected = () => {
+  return supabase !== null
+}
 
-// Test connection to reparix table
+// Test connection to Reparix table
 export const testSupabaseConnection = async () => {
+  if (!supabase) {
+    console.log('Supabase not connected yet')
+    return false
+  }
+
   try {
-    console.log('Testing Bolt-Supabase connection to Reparix table...')
+    console.log('Testing connection to Reparix table...')
     
-    // Test connection to Reparix table
     const { data, error } = await supabase
       .from('Reparix')
       .select('count', { count: 'exact', head: true })
@@ -29,13 +34,17 @@ export const testSupabaseConnection = async () => {
     
     return !error
   } catch (err) {
-    console.error('Bolt-Supabase connection test failed:', err)
+    console.error('Connection test failed:', err)
     return false
   }
 }
 
 // Insert email into Reparix table
 export const insertEmail = async (email) => {
+  if (!supabase) {
+    throw new Error('Supabase not connected. Please connect to Supabase first.')
+  }
+
   try {
     console.log('Inserting email into Reparix table:', email)
     
@@ -43,8 +52,7 @@ export const insertEmail = async (email) => {
       .from('Reparix')
       .insert([
         { 
-          email: email.toLowerCase().trim(),
-          subscribed: true
+          email: email.toLowerCase().trim()
         }
       ])
       .select()
