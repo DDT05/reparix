@@ -17,11 +17,19 @@ export const EmailSubscription = ({ compact = false }) => {
       return
     }
 
+    // Check if Supabase is properly configured
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      setStatus('error')
+      setMessage('Configuration manquante. Veuillez contacter le support.')
+      console.error('Supabase environment variables are not configured')
+      return
+    }
+
     setStatus('loading')
     
     try {
       const { data, error } = await supabase
-        .from('Reparix')
+        .from('reparix')
         .insert([
           { 
             email: email.toLowerCase().trim()
@@ -29,6 +37,7 @@ export const EmailSubscription = ({ compact = false }) => {
         ])
 
       if (error) {
+        console.error('Supabase error:', error)
         // Check if it's a duplicate email error
         if (error.code === '23505') {
           setStatus('error')
@@ -44,7 +53,7 @@ export const EmailSubscription = ({ compact = false }) => {
     } catch (error) {
       console.error('Subscription error:', error)
       setStatus('error')
-      setMessage('Une erreur est survenue. Veuillez réessayer.')
+      setMessage('Service temporairement indisponible. Veuillez réessayer plus tard.')
     }
   }
 
