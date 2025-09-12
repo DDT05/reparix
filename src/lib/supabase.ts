@@ -47,13 +47,33 @@ export const isSupabaseConfigured = () => {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Test connection
-export const testSupabaseConnection = async () => {
+export const testSupabaseConnection = async (tableName = 'reparix') => {
   try {
-    const { data, error } = await supabase.from('reparix').select('count', { count: 'exact', head: true })
-    console.log('Supabase connection test:', { success: !error, error, data })
+    console.log(`Testing connection to table: ${tableName}`)
+    
+    // Test basic connection
+    const { data, error } = await supabase.from(tableName).select('count', { count: 'exact', head: true })
+    console.log(`Supabase connection test for ${tableName}:`, { success: !error, error, data })
+    
+    if (error) {
+      console.error(`Table ${tableName} connection failed:`, error)
+      return false
+    }
+    
+    // Test table structure
+    const { data: structureData, error: structureError } = await supabase
+      .from(tableName)
+      .select('*')
+      .limit(1)
+    
+    console.log(`Table ${tableName} structure test:`, { 
+      success: !structureError, 
+      error: structureError,
+      sampleData: structureData 
+    })
+    
     return !error
   } catch (err) {
-    console.error('Supabase connection test failed:', err)
+    console.error(`Supabase connection test failed for ${tableName}:`, err)
     return false
   }
-}

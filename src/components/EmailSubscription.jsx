@@ -13,10 +13,23 @@ export const EmailSubscription = ({ compact = false }) => {
   useEffect(() => {
     const testConnection = async () => {
       if (isSupabaseConfigured()) {
-        console.log('Testing Supabase connection...')
-        const isConnected = await testSupabaseConnection()
+        console.log('Testing Supabase connection to reparix table...')
+        
+        // Test both possible table names
+        console.log('=== SUPABASE CONNECTION TEST ===')
+        console.log('Testing lowercase "reparix" table...')
+        const isConnectedLower = await testSupabaseConnection('reparix')
+        
+        console.log('Testing uppercase "Reparix" table...')
+        const isConnectedUpper = await testSupabaseConnection('Reparix')
+        
+        console.log('Connection results:', {
+          lowercase_reparix: isConnectedLower,
+          uppercase_Reparix: isConnectedUpper
+        })
+        
         setConnectionTested(true)
-        console.log('Connection test result:', isConnected)
+        console.log('=== END CONNECTION TEST ===')
       } else {
         console.log('Supabase not configured, skipping connection test')
         setConnectionTested(true)
@@ -61,7 +74,8 @@ export const EmailSubscription = ({ compact = false }) => {
       console.log('Attempting to insert email:', emailToInsert)
       
       // Insert into the reparix table
-      const { data, error } = await supabase
+      console.log('Inserting into reparix table...')
+      let { data, error } = await supabase
         .from('reparix')
         .insert([
           { 
@@ -70,6 +84,24 @@ export const EmailSubscription = ({ compact = false }) => {
           }
         ])
         .select()
+
+      // If lowercase fails, try uppercase
+      if (error && error.code === '42P01') {
+        console.log('Lowercase table failed, trying uppercase "Reparix"...')
+        const result = await supabase
+          .from('Reparix')
+          .insert([
+            { 
+              email: emailToInsert,
+              subscribed: true
+            }
+          ])
+          .select()
+        
+        data = result.data
+        error = result.error
+        console.log('Uppercase table result:', { data, error })
+      }
 
       console.log('Supabase response:', { data, error })
 
