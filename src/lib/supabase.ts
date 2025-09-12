@@ -77,3 +77,4 @@ export const testSupabaseConnection = async (tableName = 'reparix') => {
     console.error(`Supabase connection test failed for ${tableName}:`, err)
     return false
   }
+}
