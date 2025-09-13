@@ -6,8 +6,15 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY
 )
 
+interface InsertResult {
+  success: boolean
+  error?: string
+  data?: any
+  isDuplicate?: boolean
+}
+
 // Test Supabase connection
-export const testSupabaseConnection = async () => {
+export const testSupabaseConnection = async (): Promise<InsertResult> => {
   try {
     // Test connection by trying to select from Reparix table
     const { data, error } = await supabase
@@ -21,14 +28,14 @@ export const testSupabaseConnection = async () => {
 
     console.log('✅ Supabase connection test successful')
     return { success: true, data }
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Supabase connection error:', error)
     return { success: false, error: error.message }
   }
 }
 
 // Insert email into Reparix table
-export const insertEmailToReparix = async (email) => {
+export const insertEmailToReparix = async (email: string): Promise<InsertResult> => {
   try {
     console.log('📧 Inserting email to Reparix table:', email)
 
@@ -60,7 +67,7 @@ export const insertEmailToReparix = async (email) => {
     console.log('✅ Email inserted successfully:', data)
     return { success: true, data }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Email insertion error:', error)
     return { 
       success: false, 

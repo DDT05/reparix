@@ -1,16 +1,20 @@
 import React, { useState } from 'react'
 import { 
   insertEmailToReparix, 
-} from '../lib/supabaseService.js'
+} from '../lib/supabaseService'
 import { Button } from './ui/button'
 import { Mail, Check, AlertCircle } from 'lucide-react'
 
-export const EmailSubscription = ({ compact = false }) => {
+interface EmailSubscriptionProps {
+  compact?: boolean
+}
+
+export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({ compact = false }) => {
   const [email, setEmail] = useState('')
-  const [status, setStatus] = useState('idle') // idle, loading, success, error
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!email || !email.includes('@')) {
@@ -40,37 +44,36 @@ export const EmailSubscription = ({ compact = false }) => {
     }
   }
 
-
   if (compact) {
     return (
       <div className="space-y-2">
         <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Votre email"
-          className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm text-black"
-          disabled={status === 'loading'}
-        />
-        <Button
-          onClick={handleSubmit}
-          disabled={status === 'loading' || status === 'success'}
-          className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
-            status === 'success' 
-              ? 'bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto' 
-              : 'bg-green-600 hover:bg-green-700 text-white disabled:opacity-50'
-          }`}
-        >
-          {status === 'loading' ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-          ) : status === 'success' ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            'S\'inscrire'
-          )}
-        </Button>
-      </div>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Votre email"
+            className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm text-black"
+            disabled={status === 'loading'}
+          />
+          <Button
+            onClick={handleSubmit}
+            disabled={status === 'loading' || status === 'success'}
+            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
+              status === 'success' 
+                ? 'bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto' 
+                : 'bg-green-600 hover:bg-green-700 text-white disabled:opacity-50'
+            }`}
+          >
+            {status === 'loading' ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            ) : status === 'success' ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              'S\'inscrire'
+            )}
+          </Button>
+        </div>
         {message && (
           <div className={`text-xs ${status === 'success' ? 'text-green-600' : 'text-red-600'}`}>
             {message}
@@ -79,6 +82,7 @@ export const EmailSubscription = ({ compact = false }) => {
       </div>
     )
   }
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 max-w-md mx-auto">
       <div className="text-center mb-6">

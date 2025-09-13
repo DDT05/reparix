@@ -137,7 +137,7 @@ function App() {
                   className="w-full h-48 sm:h-56 md:h-64 object-contain rounded-lg shadow-2xl hover:scale-105 transition-transform duration-500" 
                 />
                 <img 
-                  src="Design_sans_titre__2_-removebg-preview.png" 
+                  src="/Design_sans_titre__2_-removebg-preview.png" 
                   alt="Tableau de bord avec port OBD2" 
                   className="w-full h-48 sm:h-56 md:h-64 object-contain rounded-lg shadow-2xl hover:scale-105 transition-transform duration-500" 
                 />
