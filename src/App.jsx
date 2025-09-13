@@ -101,7 +101,7 @@ function App() {
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="space-y-4 md:space-y-6 animate-fade-in-up">
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Le gadget de réparation pour voiture qui fait économiser{' '}
+                Le scanner de réparation automobile qui fait économiser{' '}
                 <span className="text-green-600 animate-pulse">des milliers d'euros</span>
               </h1>
               <p className="text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed">
@@ -266,9 +266,9 @@ function App() {
               </h3>
               <div className="bg-gray-100 rounded-xl p-4 md:p-8 shadow-lg">
                 <div className="w-full mx-auto">
-                  <div style={{padding:'56.5% 0 0 0', position:'relative'}}>
+                  <div style={{padding:'56.25% 0 0 0', position:'relative'}}>
                     <iframe 
-                      src="https://player.vimeo.com/video/1117772505?share=copy#t=0" 
+                      src="https://player.vimeo.com/video/1117772505?badge=0&autopause=0&player_id=0&app_id=58479" 
                       frameBorder="0" 
                       allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
                       referrerPolicy="strict-origin-when-cross-origin" 
