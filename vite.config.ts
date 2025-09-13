@@ -16,10 +16,14 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: false,
+    sourcemap: true,
     target: 'es2015',
+    assetsDir: 'assets',
     rollupOptions: {
       output: {
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
           vendor: ['react', 'react-dom'],
           supabase: ['@supabase/supabase-js'],
@@ -28,5 +32,5 @@ export default defineConfig({
       },
     },
   },
-  base: '/',
+  base: './',
 });
