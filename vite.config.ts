@@ -1,10 +1,23 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { createHtmlPlugin } from 'vite-plugin-html';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    createHtmlPlugin({
+      minify: true,
+      template: 'public/index.html',
+      inject: {
+        data: {
+          title: 'Reparix - Scanner de réparation automobile',
+          description: 'Reparix - Scanner de réparation automobile pour diagnostiquer les voyants moteur et économiser des milliers d\'euros au garage'
+        }
+      }
+    })
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -20,9 +33,6 @@ export default defineConfig({
     target: 'es2015',
     emptyOutDir: true,
     rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'index.html')
-      },
       output: {
         entryFileNames: 'assets/index-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js', 
@@ -35,5 +45,9 @@ export default defineConfig({
       },
     },
   },
-  base: './',
+  base: '/',
+  server: {
+    open: true,
+    port: 5173
+  }
 });
