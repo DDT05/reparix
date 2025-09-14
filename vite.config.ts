@@ -14,18 +14,33 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false, // Reduce bundle size in production
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.logs in production
+        drop_debugger: true,
+      },
+    },
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html')
       },
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          utils: ['framer-motion', 'react-spring', '@supabase/supabase-js']
+          'react-vendor': ['react', 'react-dom'],
+          'animation-libs': ['framer-motion', 'react-spring'],
+          'ui-libs': ['lucide-react', 'styled-components'],
+          'supabase': ['@supabase/supabase-js']
         },
       },
     },
+    chunkSizeWarningLimit: 1000,
   },
-  base: './'
+  base: './',
+  server: {
+    hmr: {
+      overlay: false
+    }
+  }
 });

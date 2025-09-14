@@ -6,6 +6,7 @@ import Tilt from 'react-parallax-tilt'
 import styled from 'styled-components'
 import { Button } from './components/ui/button'
 import { EmailSubscription } from './components/EmailSubscription'
+import { LazyImage } from './components/LazyImage'
 import { Star, Check, ArrowRight, ChevronLeft, ChevronRight, Menu, X, Wrench, Shield, Clock, Users, Quote, Zap, Award, TrendingUp } from 'lucide-react'
 import './App.css'
 
