@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useSpring, animated, config } from 'react-spring'
 import { 
   insertEmailToReparix, 
 } from '../lib/supabaseService'
@@ -13,6 +15,18 @@ export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({ compact = 
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
+
+  // Spring animation for the form
+  const formSpring = useSpring({
+    transform: status === 'success' ? 'scale(1.05)' : 'scale(1)',
+    config: config.gentle
+  })
+
+  // Spring animation for the button
+  const buttonSpring = useSpring({
+    backgroundColor: status === 'success' ? '#10b981' : '#059669',
+    config: config.gentle
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,17 +60,24 @@ export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({ compact = 
 
   if (compact) {
     return (
-      <div className="space-y-2">
+      <motion.div 
+        className="space-y-2"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
-          <input
+          <motion.input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Votre email"
             className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm text-black"
             disabled={status === 'loading'}
+            whileFocus={{ scale: 1.02 }}
           />
-          <Button
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
             onClick={handleSubmit}
             disabled={status === 'loading' || status === 'success'}
             className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
@@ -65,92 +86,199 @@ export const EmailSubscription: React.FC<EmailSubscriptionProps> = ({ compact = 
                 : 'bg-green-600 hover:bg-green-700 text-white disabled:opacity-50'
             }`}
           >
-            {status === 'loading' ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            ) : status === 'success' ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              'S\'inscrire'
-            )}
-          </Button>
+              <AnimatePresence mode="wait">
+                {status === 'loading' ? (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"
+                  />
+                ) : status === 'success' ? (
+                  <motion.div
+                    key="success"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500 }}
+                  >
+                    <Check className="w-4 h-4" />
+                  </motion.div>
+                ) : (
+                  <motion.span
+                    key="default"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    S'inscrire
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Button>
+          </motion.div>
         </div>
-        {message && (
-          <div className={`text-xs ${status === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-            {message}
-          </div>
-        )}
-      </div>
+        <AnimatePresence>
+          {message && (
+            <motion.div 
+              className={`text-xs ${status === 'success' ? 'text-green-600' : 'text-red-600'}`}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              {message}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     )
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 max-w-md mx-auto">
-      <div className="text-center mb-6">
-        <div className="w-12 h-12 md:w-16 md:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Mail className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
-        </div>
-        <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+    <animated.div 
+      style={formSpring}
+      className="bg-white rounded-2xl shadow-2xl p-6 md:p-10 max-w-lg mx-auto backdrop-blur-lg border border-white/20"
+    >
+      <motion.div 
+        className="text-center mb-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <motion.div 
+          className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-green-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
+          whileHover={{ 
+            scale: 1.1, 
+            rotate: 360,
+            boxShadow: "0 20px 40px rgba(0,0,0,0.15)"
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <Mail className="w-8 h-8 md:w-10 md:h-10 text-green-600" />
+        </motion.div>
+        <motion.h3 
+          className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent"
+          whileHover={{ scale: 1.05 }}
+        >
           Restez informé
-        </h3>
-        <p className="text-sm md:text-base text-gray-600">
+        </motion.h3>
+        <motion.p 
+          className="text-base md:text-lg text-gray-600 leading-relaxed"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           Inscrivez-vous pour recevoir les dernières nouvelles et offres spéciales de Reparix
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <motion.form 
+        onSubmit={handleSubmit} 
+        className="space-y-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+      >
         <div>
-          <input
+          <motion.input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Votre adresse email"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-black"
+            className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 text-black text-lg shadow-sm"
             disabled={status === 'loading'}
+            whileFocus={{ scale: 1.02, borderColor: "#10b981" }}
           />
         </div>
         
-        <Button
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <animated.div style={buttonSpring}>
+            <Button
           type="submit"
           disabled={status === 'loading' || status === 'success'}
-          className={`w-full py-3 text-base md:text-lg font-semibold rounded-lg transition-all duration-300 ${
+              className={`w-full py-4 text-lg md:text-xl font-bold rounded-xl transition-all duration-300 shadow-lg ${
             status === 'success' 
-              ? 'bg-green-600 hover:bg-green-700 text-white' 
-              : 'bg-green-600 hover:bg-green-700 text-white hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:hover:scale-100'
+                ? 'bg-green-600 hover:bg-green-700 text-white shadow-2xl' 
+                : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white hover:shadow-2xl disabled:opacity-50'
           }`}
         >
-          {status === 'loading' && (
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-          )}
-          {status === 'success' ? (
-            <>
-              <Check className="w-5 h-5 mr-2" />
-              Inscrit !
-            </>
-          ) : (
-            'S\'inscrire maintenant'
-          )}
-        </Button>
-      </form>
+              <AnimatePresence mode="wait">
+                {status === 'loading' && (
+                  <motion.div
+                    key="loading"
+                    className="flex items-center justify-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                    <span>Inscription...</span>
+                  </motion.div>
+                )}
+                {status === 'success' ? (
+                  <motion.div
+                    key="success"
+                    className="flex items-center justify-center"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500 }}
+                  >
+                    <Check className="w-6 h-6 mr-3" />
+                    <span>Inscrit !</span>
+                  </motion.div>
+                ) : (
+                  <motion.span
+                    key="default"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    S'inscrire maintenant
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Button>
+          </animated.div>
+        </motion.div>
+      </motion.form>
 
-      {message && (
-        <div className={`mt-4 p-3 rounded-lg flex items-start ${
+      <AnimatePresence>
+        {message && (
+          <motion.div 
+            className={`mt-6 p-4 rounded-xl flex items-start shadow-lg ${
           status === 'success' 
-            ? 'bg-green-50 text-green-800 border border-green-200' 
-            : 'bg-red-50 text-red-800 border border-red-200'
+              ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-800 border-2 border-green-200' 
+              : 'bg-gradient-to-r from-red-50 to-pink-50 text-red-800 border-2 border-red-200'
         }`}>
-          {status === 'success' ? (
-            <Check className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0 mt-0.5" />
-          ) : (
-            <AlertCircle className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0 mt-0.5" />
-          )}
-          <span className="text-sm">{message}</span>
-        </div>
-      )}
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              initial={{ rotate: 0 }}
+              animate={{ rotate: status === 'success' ? 360 : 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              {status === 'success' ? (
+                <Check className="w-5 h-5 md:w-6 md:h-6 mr-3 flex-shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="w-5 h-5 md:w-6 md:h-6 mr-3 flex-shrink-0 mt-0.5" />
+              )}
+            </motion.div>
+            <span className="text-sm md:text-base font-medium">{message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <p className="text-xs text-gray-500 text-center mt-4">
+      <motion.p 
+        className="text-sm text-gray-500 text-center mt-6 leading-relaxed"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
+      >
         En vous inscrivant, vous acceptez de recevoir nos emails marketing. 
         Vous pouvez vous désinscrire à tout moment.
-      </p>
-    </div>
+      </motion.p>
+    </animated.div>
   )
 }
