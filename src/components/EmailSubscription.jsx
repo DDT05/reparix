@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { supabase } from '../lib/supabase.ts'
+import { insertEmailToReparix } from '../lib/supabaseService.ts'
 import { Button } from './ui/button'
 import { Mail, Check, AlertCircle } from 'lucide-react'
 
@@ -20,13 +20,7 @@ export const EmailSubscription = ({ compact = false }) => {
     setStatus('loading')
     
     try {
-      const { data, error } = await supabase
-        .from('Reparix')
-        .insert([
-          { 
-            email: email.toLowerCase().trim()
-          }
-        ])
+      const { data, error } = await insertEmailToReparix(email.toLowerCase().trim())
 
       if (error) {
         // Check if it's a duplicate email error
